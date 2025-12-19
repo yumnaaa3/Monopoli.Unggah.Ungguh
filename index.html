@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <title>Monopoli Unggah-Ungguh Basa Jawa</title>
+  <style>
+    :root {
+      --ungu: #7c5dfa;
+      --biru: #4fc3f7;
+      --ijo: #7dd87d;
+      --oranye: #ffb347;
+      --merah: #ff6b6b;
+      --abu: #f5f6fb;
+      --hitam: #2d2d2d;
+      --putih: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Baloo 2", "Inter", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at 10% -10%, rgba(255,255,255,0.9) 0, transparent 45%),
+        radial-gradient(circle at 90% 0%, rgba(255,255,255,0.9) 0, transparent 45%),
+        linear-gradient(180deg, #9be3ff 0%, #c9f2ff 32%, #ffe5f6 70%, #fff8d3 100%);
+      color: var(--hitam);
+    }
+    header {
+      text-align: center;
+      padding: 24px 16px 10px;
+      position: relative;
+    }
+    header::before,
+    header::after {
+      content: "☁️";
+      position: absolute;
+      top: 8px;
+      font-size: 30px;
+      opacity: 0.9;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.18));
+    }
+    header::before { left: 16px; }
+    header::after { right: 16px; transform: scaleX(-1); }
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      color: #ffd86b;
+      letter-spacing: 0.3px;
+      text-shadow: 0 3px 0 #8b4f1f, 0 6px 14px rgba(0,0,0,0.35);
+    }
+    .tagline {
+      margin-top: 6px;
+      color: #ffe9c7;
+      font-size: 15px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .layout { padding: 16px; max-width: 1120px; margin: 0 auto 32px; }
+    .table {
+      background: radial-gradient(circle at 10% 0%, #ffffff 0%, #f9fcff 45%, #e0f0ff 100%);
+      border-radius: 28px;
+      padding: 18px 16px;
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.18),
+        inset 0 0 0 6px rgba(255,255,255,0.9);
+      border: 3px solid #c7dcff;
+    }
+    .panel {
+      background: linear-gradient(145deg, #ffffff, #f7f5ff);
+      border-radius: 20px;
+      box-shadow: 0 16px 36px rgba(124, 93, 250, 0.16), inset 0 1px 0 rgba(255,255,255,0.7);
+      padding: 18px;
+      border: 1px solid #e7e7f5;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 14px;
+    }
+    .tile {
+      position: relative;
+      background: linear-gradient(155deg, #fffef8, #fbe9d0);
+      border-radius: 18px;
+      padding: 18px 10px 14px;
+      min-height: 120px;
+      border: 2px solid #e6d4af;
+      transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, filter 140ms ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow:
+        inset 0 3px 8px rgba(0,0,0,0.05),
+        0 10px 22px rgba(0,0,0,0.1),
+        inset 0 0 0 6px rgba(255,255,255,0.6);
+      overflow: hidden;
+      isolation: isolate;
+      background-image:
+        linear-gradient(45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%, transparent);
+      background-size: 26px 26px;
+    }
+    .tile-motif {
+      position: absolute;
+      inset: 0;
+      opacity: 0.5;
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: multiply;
+    }
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 25% 20%, rgba(255,255,255,0.6), transparent 42%),
+        linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 40%),
+        repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 8px, rgba(255,255,255,0) 8px 16px);
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    .tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 64px;
+      opacity: 0.14;
+      pointer-events: none;
+      transform: translateY(4px);
+    }
+    .tile.start::before { content: "⭐"; color: #7c5dfa; }
+    .tile.finish::before { content: "🏁"; color: #30c579; }
+    .tile.card-unggah::before { content: "🎴"; color: #ffb347; }
+    .tile.card-quiz::before { content: "❓"; color: #55c5ff; }
+    .tile.card-tantangan::before { content: "🔥"; color: #ff7ab8; }
+    .tile.command::before { content: "➡️"; color: #7ad1ff; }
+    .tile:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 30px rgba(0,0,0,0.16); filter: saturate(1.08); }
+    .tile.current {
+      border-color: #ffb347;
+      box-shadow: 0 0 0 3px rgba(255,179,71,0.8), 0 18px 32px rgba(0,0,0,0.2);
+      transform: translateY(-4px) scale(1.04);
+      animation: pulse-tile 900ms ease-in-out infinite alternate;
+    }
+    .tile .label {
+      font-weight: 900;
+      font-size: 15px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.2px;
+    }
+    .tile .badge-emoji {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      font-size: 16px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .tile.start {
+      background: linear-gradient(155deg, #f2eaff, #dfd2ff);
+      border-color: #c6b3ff;
+    }
+    .tile.finish {
+      background: linear-gradient(155deg, #d8ffe9, #baffd6);
+      border-color: #9ef5c6;
+    }
+    .tile.card-unggah {
+      background: linear-gradient(155deg, #fff5e1, #ffe3b8);
+      border-color: #ffd48c;
+    }
+    .tile.card-quiz {
+      background: linear-gradient(155deg, #e7f6ff, #cde9ff);
+      border-color: #a8ddff;
+    }
+    .tile.card-tantangan {
+      background: linear-gradient(155deg, #ffe7f1, #ffd1e2);
+      border-color: #ffb3cd;
+    }
+    .tile.command {
+      background: linear-gradient(155deg, #e8f8ff, #d5f0ff);
+      border-color: #bde6ff;
+    }
+
+    /* motif khusus per kotak */
+    .tile-motif-start {
+      background-image:
+        radial-gradient(circle at 0 0, #ffe27a 0 10px, transparent 11px),
+        radial-gradient(circle at 40px 40px, #ffb347 0 8px, transparent 9px);
+    }
+    .tile-motif-finish {
+      background-image:
+        linear-gradient(45deg, rgba(0,0,0,0.08) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.08) 75%, transparent 75%, transparent);
+      background-size: 20px 20px;
+      opacity: 0.25;
+    }
+    .tile-motif-card-unggah {
+      /* motif batik titik-titik */
+      background-image:
+        radial-gradient(circle at 8px 8px, rgba(160,89,32,0.75) 0 5px, transparent 6px),
+        radial-gradient(circle at 28px 28px, rgba(228,179,106,0.85) 0 6px, transparent 7px);
+      background-size: 36px 36px;
+    }
+    .tile-motif-card-quiz {
+      background-image:
+        radial-gradient(circle at 10px 30px, rgba(123, 197, 255, 0.7) 0 6px, transparent 7px),
+        radial-gradient(circle at 30px 10px, rgba(255,255,255,0.9) 0 5px, transparent 6px);
+      background-size: 38px 38px;
+    }
+    .tile-motif-card-tantangan {
+      /* siluet candi segitiga berulang */
+      background-image:
+        linear-gradient(60deg, rgba(140,82,255,0.55) 12px, transparent 13px),
+        linear-gradient(-60deg, rgba(140,82,255,0.55) 12px, transparent 13px);
+      background-size: 24px 24px;
+    }
+    .tile-motif-command {
+      background-image:
+        linear-gradient(90deg, rgba(122,209,255,0.4) 8px, transparent 9px),
+        linear-gradient(0deg, rgba(122,209,255,0.25) 8px, transparent 9px);
+      background-size: 28px 28px;
+    }
+    .pawns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pawn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-weight: 800;
+      color: var(--putih);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6);
+      font-size: 13px;
+      border: 2px solid rgba(255,255,255,0.6);
+      transform: translateY(0);
+      transition: transform 140ms ease;
+    }
+    .pawn.p1 { background: linear-gradient(145deg, #8f6bff, #5d3bce); }
+    .pawn.p2 { background: linear-gradient(145deg, #ffb75e, #ff7b2f); }
+    .pawn.moving {
+      animation: hop 0.32s ease-in-out infinite alternate;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .auto-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #2f3545;
+      align-items: center;
+    }
+    .auto-controls label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid #e3e4ef;
+      border-radius: 12px;
+      padding: 8px 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    .auto-controls input { accent-color: #7c5dfa; }
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: var(--putih);
+      background: linear-gradient(135deg, #8a6bff, #5d3bce);
+      box-shadow: 0 12px 24px rgba(124, 93, 250, 0.3);
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+      letter-spacing: 0.3px;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.04); }
+    button:disabled { opacity: 0.65; cursor: not-allowed; box-shadow: none; }
+    .btn-secondary { background: linear-gradient(135deg, #55c5ff, #1f9ee5); box-shadow: 0 12px 24px rgba(79, 195, 247, 0.32); }
+    .status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f7f9ff;
+      border-radius: 14px;
+      border: 1px dashed #cfd8ea;
+      font-size: 15px;
+    }
+    .scoreboard { margin-top: 6px; display: grid; gap: 10px; }
+    .player-card {
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid #e5e7f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #f7f7ff, #eef1ff);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+      overflow: hidden;
+      position: relative;
+    }
+    .player-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(124,93,250,0.12), transparent 60%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+    .player-card-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 10px;
+    }
+    .player-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .player-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.16);
+      background: linear-gradient(135deg, #ffcf7b, #ff9a5c);
+    }
+    .player-card.player-1 .player-avatar {
+      background: linear-gradient(135deg, #9fd1ff, #5c8dff);
+    }
+    .player-meta {
+      text-align: right;
+    }
+    .player-card.active {
+      border-color: var(--ungu);
+      box-shadow: 0 10px 18px rgba(124,93,250,0.28);
+    }
+    .player-card.active::before {
+      opacity: 1;
+    }
+    .stars { color: #f5a524; font-size: 15px; letter-spacing: 2px; }
+    .pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--putih);
+      background: var(--hitam);
+    }
+    .card-view {
+      padding: 22px 22px 24px;
+      border-radius: 20px;
+      border: 2px solid #e7dbff;
+      background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.65), transparent 45%),
+                  linear-gradient(145deg, #fff6ff, #eef3ff);
+      display: none;
+      box-shadow: 0 24px 44px rgba(124,93,250,0.28), 0 12px 26px rgba(0,0,0,0.14);
+      min-width: 320px;
+      max-width: 480px;
+      position: relative;
+      overflow: hidden;
+      border-top: 6px solid #d5c5ff;
+    }
+    .card-view::before {
+      content: "✨";
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 22px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.18));
+    }
+    .card-view::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 10%, rgba(255,255,255,0.4), transparent 35%),
+                  radial-gradient(circle at 10% 90%, rgba(255,255,255,0.35), transparent 35%);
+      pointer-events: none;
+    }
+    .card-view.card-unggah { border-top-color: #ffce7b; }
+    .card-view.card-quiz { border-top-color: #7bd3ff; }
+    .card-view.card-tantangan { border-top-color: #ff9ac2; }
+    .card-view.card-command { border-top-color: #9bffc4; }
+    .card-view.show { display: block; }
+    .card-title { font-weight: 800; margin-bottom: 10px; color: var(--ungu); font-size: 20px; letter-spacing: 0.2px; }
+    .card-text { font-size: 16px; color: #2f3545; line-height: 1.6; font-weight: 700; }
+    .card-float {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      padding-top: 6px;
+    }
+    .toast {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #3b2da3;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.16);
+      opacity: 0;
+      transition: opacity 160ms ease, transform 160ms ease;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .toast.quiz { background: linear-gradient(135deg, #53b7ff, #2d8ae6); }
+    .toast.card-unggah { background: linear-gradient(135deg, #ffcf76, #ffaf45); color: #4a2b00; }
+    .toast.card-tantangan { background: linear-gradient(135deg, #ff8fba, #ff68a2); }
+    .toast.command { background: linear-gradient(135deg, #7be3b5, #3ecf8e); color: #0f2d1f; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .card-float .card-view { pointer-events: auto; animation: pop 0.18s ease; }
+    @keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    footer {
+      text-align: center;
+      padding: 12px;
+      color: #606778;
+      font-size: 12px;
+    }
+    .dice-box {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 6px;
+    }
+    .dice {
+      width: 120px;
+      height: 96px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #ffffff, #f3f6ff);
+      border: 3px solid #dfe4ff;
+      display: grid;
+      place-items: center;
+      font-size: 40px;
+      font-weight: 800;
+      color: #2d2d2d;
+      box-shadow: inset 0 8px 18px rgba(0,0,0,0.06), 0 12px 20px rgba(124,93,250,0.2);
+      transition: transform 0.2s ease;
+    }
+    .dice-sum {
+      text-align: center;
+      font-weight: 800;
+      color: #7c5dfa;
+      margin-top: 4px;
+      text-shadow: 0 2px 8px rgba(124,93,250,0.2);
+    }
+    .dice.rolling { animation: spin 0.7s linear; }
+    @keyframes spin {
+      from { transform: rotate3d(1,1,0,0deg); }
+      to { transform: rotate3d(1,1,0,720deg); }
+    }
+    .stage {
+      position: relative;
+      width: 100%;
+      padding: 16px 0 6px;
+      display: grid;
+      place-items: center;
+    }
+    .card-slot {
+      width: 82%;
+      height: 126px;
+      background: linear-gradient(145deg, #f9f3dd, #eadfaf);
+      border: 3px solid #d3c590;
+      border-radius: 18px;
+      box-shadow: inset 0 6px 14px rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-slot::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 40%),
+                  radial-gradient(circle at 70% 70%, rgba(255,255,255,0.5), transparent 45%),
+                  linear-gradient(135deg, #d8efc9, #f8f9e9);
+      opacity: 0.8;
+    }
+    .dice-stack {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+    .chest {
+      font-size: 42px;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,0.2));
+      transform: translateY(14px);
+    }
+    @keyframes hop {
+      from { transform: translateY(0); }
+      to { transform: translateY(-6px); }
+    }
+    @keyframes pulse-tile {
+      from { filter: saturate(1.05) brightness(1); }
+      to { filter: saturate(1.18) brightness(1.05); }
+    }
+    @media (max-width: 960px) {
+      .board { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 22px; }
+      .board { grid-template-columns: repeat(3, 1fr); }
+      .layout { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>APE: Monopoli Unggah-Ungguh Basa Jawa</h1>
+    <div class="tagline">Latihan sopan santun nganggo basa Jawa kanthi cara sing nyenengake.</div>
+  </header>
+
+  <div class="layout">
+    <div class="table">
+    <div class="panel">
+      <div class="controls">
+        <button id="rollBtn">🎲 Lempar Dadu</button>
+        <button id="successBtn" class="btn-secondary" disabled>✅ Tugas Berhasil</button>
+        <button id="skipBtn" class="btn-secondary" disabled>⏭️ Lewati</button>
+      </div>
+      <div class="auto-controls">
+        <label><input type="checkbox" id="autoPlay"> Mode otomatis (lempar & lanjut)</label>
+        <label><input type="checkbox" id="autoStar"> Otomatis tambahkan bintang saat kartu</label>
+      </div>
+      <div class="dice-box">
+        <div class="dice" id="diceFace">?</div>
+      </div>
+      <div class="dice-sum" id="diceSum"></div>
+      <div class="status" id="statusText">Giliran: Pemain 1 • Klik "Lempar Dadu"</div>
+      <div class="stage">
+        <div class="card-slot"></div>
+        <div class="dice-stack">
+          <div style="font-size:52px; line-height:1; transform: translateY(-6px);" id="diceStackFace">🎲</div>
+          <div class="chest">🧰</div>
+        </div>
+        <div class="card-slot" style="margin-top:12px;"></div>
+        <div class="toast" id="toast"></div>
+        <div class="card-float">
+          <div class="card-view" id="cardView">
+            <div class="card-title" id="cardTitle"></div>
+            <div class="card-text" id="cardText"></div>
+          </div>
+        </div>
+      </div>
+      <div class="board" id="board"></div>
+      <div class="scoreboard" id="scoreboard"></div>
+      <div id="log" style="display:none"></div>
+    </div>
+    </div>
+  </div>
+
+  <footer>Dirancang kanggo bocah: warna cerah, teks prasaja, lan kartu unggah-ungguh.</footer>
+
+  <script>
+    const diceChars = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+    const tileIcons = {
+      start: "⚑",
+      finish: "🏁",
+      "card-unggah": "🎴",
+      "card-quiz": "❓",
+      "card-tantangan": "🔥",
+      command: "➡️",
+      bonus: "⭐"
+    };
+    const playerEmojis = ["🦊", "🐼"];
+
+    const tiles = [
+      { label: "Wiwitan", type: "start" },
+      { label: "Kartu Unggah-ungguh", type: "card-unggah" },
+      { label: "Maju selangkah", type: "command", action: { move: 1 } },
+      { label: "Kuis boso Jowo", type: "card-quiz" },
+      { label: "Bonus ⭐", type: "bonus" },
+      { label: "Tantangan gerak", type: "card-tantangan" },
+      { label: "Mundur selangkah", type: "command", action: { move: -1 } },
+      { label: "Njupuk kartu sekarepmu", type: "command", action: { pickAny: true } },
+      { label: "Rampung", type: "finish" }
+    ];
+
+    // Kartu unggah-ungguh dibedakan per pemain
+    const deckUnggahPerPlayer = [
+      [
+        "Pemain 1: Ucapna \"Matur nuwun\" kanthi banter lan senyum.",
+        "Pemain 1: Ngomong \"Nyuwun sewu\" nalika arep liwat ngarep kanca.",
+        "Pemain 1: Ucapna \"Kula nuwun\" kaya arep mlebu omah simbah.",
+        "Pemain 1: Ucapna \"Mangga\" nalika maringi giliran.",
+        "Pemain 1: Ucapna \"Sugeng enjang\" marang kabeh sing ana ing meja.",
+        "Pemain 1: Kandhaa \"Matur nuwun wis ngenteni kula.\"",
+        "Pemain 1: Kandhaa \"Nyuwun sewu, kula maju rumiyin.\""
+      ],
+      [
+        "Pemain 2: Ucapna \"Matur nuwun sanget\" karo tangan disembahke alon.",
+        "Pemain 2: Ngomong \"Nyuwun sewu\" nalika arep takon guru.",
+        "Pemain 2: Ucapna \"Kula badhe nyuwun tulung\" marang kancamu.",
+        "Pemain 2: Ucapna \"Sampun\" yen wis rampung diparingi bantuan.",
+        "Pemain 2: Ucapna \"Sampun nedha?\" marang kanca ing sisihmu.",
+        "Pemain 2: Kandhaa \"Kancaku, monggo giliranmu.\"",
+        "Pemain 2: Kandhaa \"Matur nuwun sampun dolanan bareng.\""
+      ]
+    ];
+
+    const deckQuiz = [
+      "Sebutna tembung krama saka \"mangan\".",
+      "Gunakake ukara nganggo \"nyuwun sewu\".",
+      "Sebutke telu tembung warna (abang, biru, kuning, ireng).",
+      "Sebutna angka siji nganti lima.",
+      "Sebutna anggota kulawarga: ibu, bapak, simbah (krama).",
+      "Gawe ukara nganggo tembung \"mlaku\" lan \"kanca\".",
+      "Sebutna telu tembung gegayutan dolanan.",
+      "Sebutna sapaan: \"Hai, kanca!\" / \"Sugeng dalu\" / \"Sampun padha siap?\"",
+      "Wangsulana pitakon iki…"
+    ];
+
+    const deckTantangan = [
+      "Maju selangkah.",
+      "Maju rong langkah.",
+      "Mundur selangkah.",
+      "Mundur rong langkah.",
+      "Ngenteni kancané dhisik.",
+      "Tindakake perintah ing kartu.",
+      "Jupuk sak kartu.",
+      "Baleni ukara iki: \"Nyuwun sewu, kula liwat rumiyin\".",
+      "Baleni ukara iki: \"Matur nuwun sanget\".",
+      "Baleni ukara iki: \"Kancaku, monggo giliranmu.\""
+    ];
+
+    const players = [
+      { name: "Pemain 1", pos: 0, stars: 0, pawn: "p1" },
+      { name: "Pemain 2", pos: 0, stars: 0, pawn: "p2" }
+    ];
+
+    let current = 0;
+    let awaitingTask = false;
+    let skipNext = new Set();
+    let movingPlayerIndex = null;
+
+    const boardEl = document.getElementById("board");
+    const statusText = document.getElementById("statusText");
+    const logEl = document.getElementById("log");
+    const scoreboardEl = document.getElementById("scoreboard");
+    const cardView = document.getElementById("cardView");
+    const cardTitle = document.getElementById("cardTitle");
+    const cardText = document.getElementById("cardText");
+    const toastEl = document.getElementById("toast");
+    const rollBtn = document.getElementById("rollBtn");
+    const successBtn = document.getElementById("successBtn");
+    const skipBtn = document.getElementById("skipBtn");
+    const autoPlayToggle = document.getElementById("autoPlay");
+    const autoStarToggle = document.getElementById("autoStar");
+    let toastTimer;
+    let autoTimer;
+    let taskTimer;
+
+    function describeTile(tile) {
+      if (!tile) return "";
+      if (tile.type === "start") {
+        return "Wiwitan permainan. Saka kene kabeh pemain miwiti perjalanan unggah-ungguh.";
+      }
+      if (tile.type === "finish") {
+        return "Kotak Rampung! Tandha yen pemain wis ngubengi papan nganti pungkasan.";
+      }
+      if (tile.type === "bonus") {
+        return "Kotak Bonus ⭐. Yen mlebu kene, pemain entuk siji bintang tambahan.";
+      }
+      if (tile.type === "command") {
+        if (tile.action?.move === 1) {
+          return "Perintah maju siji kotak. Tansah eling sopan sanajan cepet-cepet.";
+        }
+        if (tile.action?.move === -1) {
+          return "Perintah mundur siji kotak. Ora apa-apa mundur, sing penting tetep sopan.";
+        }
+        if (tile.action?.pickAny) {
+          return "Kothak perintah bebas. Pilih lan tindakake isi kartu apa wae.";
+        }
+        if (tile.action?.task) {
+          return `Kothak perintah. Tindakake tugas: ${tile.action.task}`;
+        }
+        return "Kothak perintah. Waca lan tindakake aturan ing teks.";
+      }
+      return "";
+    }
+
+    function showToast(text, type = "") {
+      if (!toastEl) return;
+      toastEl.textContent = text;
+      toastEl.className = `toast ${type}`.trim();
+      requestAnimationFrame(() => {
+        toastEl.classList.add("show");
+      });
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove("show");
+      }, 1400);
+    }
+
+    function showCard(title, text, type = "") {
+      cardTitle.textContent = title;
+      cardText.textContent = text;
+      cardView.className = `card-view show ${type}`.trim();
+    }
+
+    function clearTimers() {
+      clearTimeout(autoTimer);
+      clearTimeout(taskTimer);
+    }
+
+    function scheduleAutoRoll() {
+      clearTimeout(autoTimer);
+      if (!autoPlayToggle.checked) return;
+      autoTimer = setTimeout(() => {
+        if (!awaitingTask) {
+          rollDice();
+        }
+      }, 1200);
+    }
+
+    function renderBoard() {
+      boardEl.innerHTML = "";
+      const currentTileIndex = players[current]?.pos ?? 0;
+      tiles.forEach((tile, idx) => {
+        const isCurrent = idx === currentTileIndex;
+        const tileDiv = document.createElement("div");
+        tileDiv.className = `tile ${tile.type}${isCurrent ? " current" : ""}`;
+        const icon = tileIcons[tile.type] || "⬜";
+        tileDiv.innerHTML = `
+          <div class="tile-motif tile-motif-${tile.type}"></div>
+          <div class="badge-emoji">${icon}</div>
+          <div class="label">${icon} ${tile.label}</div>
+          <div class="pawns" id="pawns-${idx}"></div>
+        `;
+        boardEl.appendChild(tileDiv);
+      });
+      updatePawns();
+    }
+
+    function updatePawns() {
+      players.forEach((p, i) => {
+        const container = document.getElementById(`pawns-${p.pos}`);
+        if (container) {
+          const pawn = document.createElement("div");
+          pawn.className = `pawn ${p.pawn}${i === movingPlayerIndex ? " moving" : ""}`;
+          pawn.textContent = i + 1;
+          container.appendChild(pawn);
+        }
+      });
+    }
+
+    function renderScoreboard() {
+      scoreboardEl.innerHTML = "";
+      players.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = `player-card player-${idx}` + (idx === current ? " active" : "");
+        const avatar = playerEmojis[idx] || "🙂";
+        card.innerHTML = `
+          <div class="player-card-inner">
+            <div class="player-main">
+              <div class="player-avatar">${avatar}</div>
+              <div>
+                <div style="font-weight:800;color:${idx === current ? 'var(--ungu)' : '#111'}">${p.name}</div>
+                <div style="font-size:12px;color:#4a5568">Kotak: ${p.pos + 1} / ${tiles.length}</div>
+              </div>
+            </div>
+            <div class="player-meta">
+              <span class="pill">${idx === current ? "Giliran" : "Menunggu"}</span>
+              <div class="stars" aria-label="bintang">${"⭐".repeat(p.stars || 0)}</div>
+            </div>
+          </div>
+        `;
+        scoreboardEl.appendChild(card);
+      });
+    }
+
+    function log(message) {
+      const time = new Date().toLocaleTimeString("id-ID", { hour12: false });
+      const line = document.createElement("div");
+      line.textContent = `[${time}] ${message}`;
+      logEl.prepend(line);
+    }
+
+    function drawCard(kind) {
+      let deck = [], title = "Kartu Unggah-Ungguh";
+      if (kind === "card-unggah") {
+        deck = deckUnggahPerPlayer[current] || deckUnggahPerPlayer[0];
+      }
+      if (kind === "card-quiz") { deck = deckQuiz; title = "Kartu Kuis"; }
+      if (kind === "card-tantangan") { deck = deckTantangan; title = "Kartu Tantangan"; }
+      const text = deck[Math.floor(Math.random() * deck.length)];
+      showCard(title, text, kind);
+      showToast(title, kind);
+      awaitingTask = true;
+      successBtn.disabled = false;
+      skipBtn.disabled = false;
+      log(`${players[current].name} narik ${title}: "${text}"`);
+      statusText.textContent = `${players[current].name} nindakake tugas saka kartu.`;
+      clearTimeout(taskTimer);
+      if (autoPlayToggle.checked) {
+        taskTimer = setTimeout(() => {
+          if (autoStarToggle.checked) {
+            successBtn.click();
+          } else {
+            skipBtn.click();
+          }
+        }, 1400);
+      }
+    }
+
+    function handleTile(p) {
+      const tile = tiles[p.pos];
+      const info = describeTile(tile);
+      if (info) {
+        showToast(tile.label);
+        showCard(tile.label, info, tile.type === "bonus" ? "card-command" : tile.type);
+      }
+      if (tile.type.startsWith("card")) {
+        drawCard(tile.type);
+        return;
+      }
+      if (tile.type === "bonus") {
+        players[current].stars += 1;
+        log(`${p.name} entuk bonus ⭐!`);
+        statusText.textContent = `${p.name} nampa bintang bonus.`;
+        endTurn();
+        return;
+      }
+      if (tile.type === "command") {
+        if (tile.action?.move) {
+          const old = p.pos;
+          p.pos = Math.min(Math.max(0, p.pos + tile.action.move), tiles.length - 1);
+          log(`${p.name} ngetutake perintah: pindhah saka ${old + 1} menyang ${p.pos + 1}`);
+          if (old !== p.pos) {
+            renderBoard();
+          }
+        }
+        if (tile.action?.pickAny) {
+          const pools = [
+            ...[].concat(...deckUnggahPerPlayer),
+            ...deckQuiz,
+            ...deckTantangan
+          ];
+          const text = pools[Math.floor(Math.random() * pools.length)];
+          showCard("Jupuk Kartu Sekarepmu", text, "card-command");
+          showToast("Kartu bebas", "card-command");
+          awaitingTask = true;
+          successBtn.disabled = false;
+          skipBtn.disabled = false;
+          log(`${p.name} njupuk kartu bebas: "${text}"`);
+          statusText.textContent = `${p.name} nindakake kartu bebas.`;
+          return;
+        }
+        if (tile.action?.skip) {
+          skipNext.add(players.indexOf(p));
+          log(`${p.name} kudu ngenteni giliran sabanjure.`);
+        }
+        if (tile.action?.task) {
+          showCard("Perintah", tile.action.task, "card-command");
+          showToast("Perintah", "command");
+          awaitingTask = true;
+          successBtn.disabled = false;
+          skipBtn.disabled = false;
+          statusText.textContent = `${p.name} nindakake perintah: ${tile.action.task}`;
+          return;
+        }
+      }
+      if (tile.type === "finish") {
+        log(`${p.name} tekan Rampung! Putaran rampung.`);
+        statusText.textContent = `${p.name} wis tekan Rampung. Tetep maju kanggo putaran sabanjure.`;
+      }
+      endTurn();
+    }
+
+    function endTurn() {
+      renderBoard();
+      renderScoreboard();
+      awaitingTask = false;
+      successBtn.disabled = true;
+      skipBtn.disabled = true;
+      cardView.classList.remove("show");
+      current = (current + 1) % players.length;
+      while (skipNext.has(current)) {
+        skipNext.delete(current);
+        log(`${players[current].name} dilewati amarga perintah.`);
+        current = (current + 1) % players.length;
+      }
+      rollBtn.disabled = false;
+      statusText.textContent = `Giliran: ${players[current].name} • Klik "Lempar Dadu"`;
+      scheduleAutoRoll();
+    }
+
+    function animateMove(playerIndex, targetPos, done) {
+      const p = players[playerIndex];
+      const step = targetPos > p.pos ? 1 : -1;
+      movingPlayerIndex = playerIndex;
+
+      function stepOnce() {
+        if (p.pos === targetPos) {
+          movingPlayerIndex = null;
+          renderBoard();
+          renderScoreboard();
+          done && done();
+          return;
+        }
+        p.pos += step;
+        renderBoard();
+        renderScoreboard();
+        setTimeout(stepOnce, 260);
+      }
+
+      stepOnce();
+    }
+
+    function rollDice() {
+      if (awaitingTask || movingPlayerIndex !== null) return;
+      rollBtn.disabled = true;
+      const diceFace = document.getElementById("diceFace");
+      const diceSumEl = document.getElementById("diceSum");
+      const diceStackFace = document.getElementById("diceStackFace");
+      diceFace.classList.add("rolling");
+      const diceVal = Math.floor(Math.random() * 6) + 1;
+      setTimeout(() => {
+        diceFace.classList.remove("rolling");
+        diceFace.textContent = diceChars[diceVal - 1];
+        diceStackFace.textContent = diceChars[diceVal - 1];
+        diceSumEl.textContent = `Langkah: ${diceVal}`;
+        const idx = current;
+        const p = players[idx];
+        const target = Math.min(p.pos + diceVal, tiles.length - 1);
+        log(`${p.name} lempar dadu: ${diceVal}, maju menyang kotak ${target + 1}`);
+        statusText.textContent = `${p.name} mlaku menyang kotak ${target + 1}...`;
+        animateMove(idx, target, () => {
+          const tile = tiles[target];
+          statusText.textContent = `${p.name} tekan kotak ${target + 1}: ${tile.label}`;
+          handleTile(p);
+        });
+      }, 720);
+    }
+
+    rollBtn.addEventListener("click", rollDice);
+    successBtn.addEventListener("click", () => {
+      if (!awaitingTask) return;
+      players[current].stars += 1;
+      log(`${players[current].name} ngrampungake tugas lan entuk 1 bintang!`);
+      statusText.textContent = `${players[current].name} entuk ⭐. Giliran diterusake.`;
+      endTurn();
+    });
+    skipBtn.addEventListener("click", () => {
+      if (!awaitingTask) return;
+      log(`${players[current].name} milih nerusake tanpa bintang.`);
+      statusText.textContent = `${players[current].name} rampung tugas tanpa bintang.`;
+      endTurn();
+    });
+
+    autoPlayToggle.addEventListener("change", () => {
+      clearTimers();
+      if (autoPlayToggle.checked && !awaitingTask) {
+        scheduleAutoRoll();
+      }
+    });
+
+    autoStarToggle.addEventListener("change", () => {
+      // no-op, affects next card resolution
+    });
+
+    renderBoard();
+    renderScoreboard();
+    log("Papan siap. Giliran dimulai saka Pemain 1.");
+  </script>
+</body>
+</html>
+
